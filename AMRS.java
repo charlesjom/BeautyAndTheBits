@@ -2,6 +2,7 @@ import java.io.FileReader;
 import java.io.BufferedReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.io.IOException;
 
 public class AMRS {
 	public static final String[] keywords = new String[]{"LOAD", "ADD", "SUB", "CMP", "PC", "MAR", "MBR", "OF", "NF", "ZF"};
@@ -30,7 +31,7 @@ public class AMRS {
 			while ((line = buffer.readLine()) != null) {
 				Instruction instruction = new Instruction(line, lineCounter);
 
-				if (instruction.getValidity() == true) instructions.add(instruction);
+				if (instruction.isValid()) instructions.add(instruction);
 				else {
 					withError = true;
 					errorCounter++;
@@ -39,7 +40,7 @@ public class AMRS {
 				lineCounter++;
 			}
 
-		} catch (Exception e) {
+		} catch (IOException e) {
 			System.out.println("Error! Can't read file");
 		}
 

@@ -1,4 +1,5 @@
 import java.util.Arrays;
+import java.lang.NumberFormatException;
 
 public class Instruction {
 	private String instructionType;
@@ -65,7 +66,7 @@ public class Instruction {
 	private boolean isNumber(String part) {
 		try {
 			Integer.parseInt(part);
-		} catch (Exception e) {
+		} catch (NumberFormatException e) {
 			return false;
 		}
 		return true;
@@ -80,7 +81,7 @@ public class Instruction {
 		return this.instructionType;
 	}
 
-	public boolean getValidity() {
+	public boolean isValid() {
 		return this.valid;
 	}
 }
