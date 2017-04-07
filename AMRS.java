@@ -54,11 +54,11 @@ public class AMRS {
 	private void initRegisters() {
 		registers = new HashMap<String, Register>(NO_OF_REGISTERS);
 		for(String s : otherRegisters) {
-			registers.put(s, new Register(0));
+			registers.put(s, new Register(null));
 		}
 		for(int i=1; i<=32; i++) {
 			String registerName = "R" + i;
-			registers.put(registerName, new Register(0));
+			registers.put(registerName, new Register(null));
 		}
 	}
 
