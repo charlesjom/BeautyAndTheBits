@@ -1,0 +1,6 @@
+Error Checking Class
+Boolean is<name>;
+extend Runtime error exception
+if (instruction.isValid()){
+	
+}
