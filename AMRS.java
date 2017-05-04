@@ -17,7 +17,10 @@ public class AMRS {
 	
 	private int clockCycles = 0;
 	private ArrayList<Instruction> instructions;
+	private ArrayList<Register> inUse;
 	private HashMap<String, Register> registers;
+
+	private Instruction fetching, decoding, executing, memaccessing, writing;
 
 	public AMRS(String filepath) {
 		instructions = new ArrayList<Instruction>();
@@ -48,6 +51,10 @@ public class AMRS {
 
 	public void start() {
 		initRegisters();
+		// while (true) {
+
+		// }
+		printRegisters();
 	}
 
 	// initialize all the registers
@@ -60,6 +67,39 @@ public class AMRS {
 			String registerName = "R" + i;
 			registers.put(registerName, new Register());
 		}
+	}
+
+	// print all the registers
+	private void printRegisters() {
+		for (String key: registers.keySet()) {
+			Register r = registers.get(key);
+			System.out.println(key + " : " + r.getValue());
+		}
+	}
+
+	// fetch
+	private void fetch(Instruction i) {
+
+	}
+
+	// decode
+	private void decode(Instruction i) {
+
+	}
+
+	// execute
+	private void execute(Instruction i) {
+
+	}
+
+	// memory access
+	private void memoryAccess(Instruction i) {
+
+	}
+
+	// write back
+	private void writeBack(Instruction i) {
+
 	}
 
 	public static void main(String[] args) {
