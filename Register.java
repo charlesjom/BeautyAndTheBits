@@ -1,8 +1,7 @@
 public class Register {
 	private int value;
 
-	public Register(int value) {
-		this.value = value;
+	public Register() {
 	}
 
 	public boolean setValue(int newValue) {
