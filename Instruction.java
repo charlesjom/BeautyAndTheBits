@@ -46,6 +46,7 @@ public class Instruction {
 			valid = false;
 			errorMsgStatus[2] = true;
 		}
+		
 		if (Arrays.asList(AMRS.instruction_types).contains(instrParts[0]) == false) {
 			valid = false;
 			errorMsgStatus[3] = true;
@@ -60,6 +61,11 @@ public class Instruction {
 			for (int i = 0; i<errorMsgStatus.length; i++) {
 				if (errorMsgStatus[i] == true) System.out.println("\t" + errorMessages[i]);
 			}
+		}
+		else {
+			instructionType = instrParts[0];
+			parameter1 = instrParts[1];
+			parameter2 = instrParts[2];
 		}
 	}
 
@@ -76,12 +82,20 @@ public class Instruction {
 		return part.startsWith("R");
 	}
 
-	// getter
+	// getters
 	public String getInstType() {
 		return this.instructionType;
 	}
 
 	public boolean isValid() {
 		return this.valid;
+	}
+
+	public String getFirstOp() {
+		return this.parameter1;
+	}
+
+	public String getSecondOp() {
+		return this.parameter2;
 	}
 }
