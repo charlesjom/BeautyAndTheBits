@@ -5,6 +5,7 @@ public class Instruction {
 	private String instructionType;
 	private String parameter1;
 	private String parameter2;
+	private Operation operation;
 	
 	private int lineCount;
 	private boolean valid;
@@ -97,5 +98,13 @@ public class Instruction {
 
 	public String getSecondOp() {
 		return this.parameter2;
+	}
+
+	public void initOperation(String op1, String op2) {
+		operation = new Operation(op1, op2);
+	}
+
+	public Operation getOperation() {
+		return this.operation;
 	}
 }
