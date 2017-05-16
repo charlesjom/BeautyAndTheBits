@@ -126,7 +126,7 @@ public class AMRS {
 			inMemAcs = temp2;
 			inWrtBk = temp3;
 
-			// printRegisters();
+			printRegisters();
 			clockCycles++;
 			if (stalled == true) stalls++;
 			stalled = false;
@@ -144,7 +144,7 @@ public class AMRS {
 		int address = registers.get("PC").getValue();		// get adrress of instruction
 		registers.get("MAR").setValue(address);				// put address to MAR
 		if (address > instructions.size()) return ;
-		System.out.println("FETCH");
+		// System.out.println("FETCH");
 		registers.get("PC").setValue(address+1);		// increment PC
 	}
 
@@ -163,27 +163,27 @@ public class AMRS {
 			if ((first == execUseDest && first != null && inExec) || (first == memUseDest && first != null && inMemAcs) || (first == wrtUseDest && first != null && inWrtBk)) {
 				stalled = true;
 				// encountered = new Hazard(instBefore.getStatement(), decoding.getStatement(), 1);	// WAW
-				System.out.println("STALL");
+				// System.out.println("STALL");
 			}
 			else if ((second == execUseDest && second != null && inExec) || (second == memUseDest && second != null && inMemAcs) || (second == wrtUseDest && second != null && inWrtBk)) {
 				stalled = true;
 				// encountered = new Hazard(instBefore.getStatement(), decoding.getStatement(), 2);	// RAW
-				System.out.println("STALL");
+				// System.out.println("STALL");
 			}
 			else if ((first == execUseSrc && first != null && inExec) || (first == memUseSrc && first != null && inMemAcs) || (first == wrtUseSrc && first != null && inWrtBk)) {
 				stalled = true;
 				// encountered = new Hazard(instBefore.getStatement, decoding.getStatement(), 3);		// WAR
-				System.out.println("STALL");
+				// System.out.println("STALL");
 			}
 			else {
-				System.out.println("DECODE");
+				// System.out.println("DECODE");
 				decoding.initOperation(decoding.getFirstOp(), decoding.getSecondOp());
 				executing = decoding;
 				decoding = null;
 			}
 		}
 		else {
-			System.out.println("DECODE");
+			// System.out.println("DECODE");
 			decoding.initOperation(decoding.getFirstOp(), decoding.getSecondOp());
 			executing = decoding;
 			decoding = null;
@@ -193,7 +193,7 @@ public class AMRS {
 	private void execute() {
 		// if there is no instruction to execute
 		if (executing == null) return ;
-		System.out.println("EXECUTE");
+		// System.out.println("EXECUTE");
 		executing.getOperation().operate(executing.getInstType(), EXECUTE);
 		execUseDest  = registers.get(executing.getFirstOp());
 		execUseSrc  = registers.get(executing.getSecondOp());
@@ -203,7 +203,7 @@ public class AMRS {
 
 	private void memoryAccess() {
 		if (memAccessing == null) return ;
-		System.out.println("MEMORY ACCESS");
+		// System.out.println("MEMORY ACCESS");
 		memAccessing.getOperation().operate(memAccessing.getInstType(), MEMACESS);
 		memUseDest  = registers.get(memAccessing.getFirstOp());
 		memUseSrc  = registers.get(memAccessing.getSecondOp());
@@ -213,7 +213,7 @@ public class AMRS {
 
 	private void writeBack() {
 		if (writing == null) return ;
-		System.out.println("WRITE BACK");
+		// System.out.println("WRITE BACK");
 		writing.getOperation().operate(writing.getInstType(), WRITEBK);
 		wrtUseDest  = registers.get(writing.getFirstOp());
 		wrtUseSrc = registers.get(writing.getSecondOp());
