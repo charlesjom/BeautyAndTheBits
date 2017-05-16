@@ -2,6 +2,7 @@ import java.io.FileReader;
 import java.io.BufferedReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.io.IOException;
 
 public class AMRS {
@@ -9,6 +10,11 @@ public class AMRS {
 	public static final String[] instruction_types = new String[]{"LOAD", "ADD", "SUB", "CMP"};
 	public static final String[] otherRegisters = new String[]{"PC", "MAR", "MBR", "OF", "NF", "ZF"};
 	public static final int NO_OF_REGISTERS = 38;
+	public static final int EXECUTE = 1;
+	public static final int MEMACESS = 2;
+	public static final int WRITEBK = 3;
+
+	public static HashMap<String, Register> registers;
 
 	private String line;
 	private int lineCounter = 1;
@@ -16,10 +22,23 @@ public class AMRS {
 	private boolean withError = false;
 	private int done = 0;
 	
-	private int clockCycles = 0;
+	private int clockCycles = 1;
+	private int stalls = 0;
+	private boolean stalled = false;
 	private ArrayList<Instruction> instructions;
-	private ArrayList<Register> inUse;
-	private HashMap<String, Register> registers;
+
+	
+	private Register execUse, memUse, wrtUse;
+	private boolean inExec, inMemAcs, inWrtBk;
+
+	private String dest, src;
+
+	private Instruction decoding = null;
+	private Instruction executing = null;
+	private Instruction memAccessing = null;
+	private Instruction writing = null;
+	private int result, op1, op2;
+	private Results results;
 
 	private String dest, src;
 
@@ -79,115 +98,122 @@ public class AMRS {
 	}
 
 	// start AMRS
-	public int start() {
+	public Results start() {
 		initRegisters();
 
-		registers.get("PC").setValue(0);
+		registers.get("PC").setValue(1);
 
 		while (true) {
+			boolean temp1, temp2, temp3;
+			System.out.println("----------------------------------");
+			System.out.println("Clock Cycle: " + clockCycles + "\n");
+			
+			// System.out.println(executing + " " + memAccessing + " " + writing);
+
 			writeBack();
 			memoryAccess();
+			temp3 = writing != null;
+
 			execute();
-			decode();									
+			temp2 = memAccessing != null;
+		
+			// System.out.println(inExec);
+			// System.out.println(inMemAcs);
+			// System.out.println(inWrtBk);
+
+			decode();
+			// System.out.println(executing + " " + memAccessing + " " + writing);
+			temp1 = executing != null;
+
 			fetch();
 
-			System.out.println("Clock Cycle: " + clockCycles);
-			printRegisters();
-			System.out.println("");
+			inExec = temp1;
+			inMemAcs = temp2;
+			inWrtBk = temp3;
+
+			// printRegisters();
 			clockCycles++;
+			if (stalled == true) stalls++;
+			stalled = false;
 
 			if (done == instructions.size()) break;
+
+			results = new Results(stalls, clockCycles);
 		}
-		return clockCycles - 1;
+		return results;
 	}
 
 	// stages
 	private void fetch() {
+		if (stalled == true) return;
 		int address = registers.get("PC").getValue();		// get adrress of instruction
-		registers.get("MAR").setValue(address);
-
-		if (address < instructions.size()) {
-			registers.get("PC").setValue(address+1);		// increment PC
-		}
+		registers.get("MAR").setValue(address);				// put address to MAR
+		if (address > instructions.size()) return ;
+		System.out.println("FETCH");
+		registers.get("PC").setValue(address+1);		// increment PC
 	}
 
 	private void decode() {
-		if (registers.get("MAR").getValue() > 0) {
-			executing = instructions.get(registers.get("MAR").getValue() - 1);	// get instruction
+		if (registers.get("MAR").getValue() == 0 || registers.get("MAR").getValue() > instructions.size()) return ;
+		decoding = instructions.get(registers.get("MAR").getValue() - 1);	// get instruction
+
+		Register first = registers.get(decoding.getFirstOp());
+		Register second = registers.get(decoding.getSecondOp());
+		System.out.println(decoding.getFirstOp() + " " + decoding.getSecondOp());
+
+		if ((first == execUse && first != null && inExec) ||
+			(first == memUse && first != null && inMemAcs) ||
+			(first == wrtUse && first != null && inWrtBk) ||
+			(second == execUse && second != null && inExec) ||
+			(second == memUse && second != null && inMemAcs) ||
+			(second == wrtUse && second != null && inWrtBk)) {
+			stalled = true;
+			System.out.println("STALL");
+		}
+		else {
+			System.out.println("DECODE");
+			decoding.initOperation(decoding.getFirstOp(), decoding.getSecondOp());
+			executing = decoding;
+			decoding = null;
 		}
 	}
 
 	private void execute() {
 		// if there is no instruction to execute
-		if (executing == null) return;
-		dest = executing.getFirstOp();
-		src = executing.getSecondOp();
-
-		switch (executing.getInstType()) {
-			case "LOAD":
-				result = Integer.parseInt(src);
-				// sets OF to 1 if the value loaded is more than 2 digits, 0 otherwise
-				if (result > 99) registers.get("OF").setValue(1);	
-				else registers.get("OF").setValue(0);
-				break;
-
-			case "ADD":
-				op1 = registers.get(dest).getValue();
-				op2 = registers.get(src).getValue();
-				result = op1 + op2;
-				// sets OF to 1 if the value loaded is more than 2 digits, 0 otherwise
-				if (result > 99) registers.get("OF").setValue(1);	
-				else registers.get("OF").setValue(0);
-				break;
-
-			case "SUB":
-				op1 = registers.get(dest).getValue();
-				op2 = registers.get(src).getValue();
-				result = op1 - op2;
-				// sets OF to 1 if the value loaded is more than 2 digits, 0 otherwise
-				if (result > 99) registers.get("OF").setValue(1);
-				else registers.get("OF").setValue(0);
-				// sets NF to 1 if the value loaded is negative 
-				if (result < 0) registers.get("NF").setValue(1);
-				else registers.get("NF").setValue(0);
-				break;
-
-			case "CMP":
-				op1 = registers.get(dest).getValue();
-				op2 = registers.get(src).getValue();
-				result = op1 - op2;
-				// sets ZF to 1 if the result is 0, 0 otherwise
-				if (result == 0) registers.get("ZF").setValue(1);
-				else registers.get("ZF").setValue(0);
-				// sets NF to 1 if the result is negative, 0 otherwise
-				if (result < 0) registers.get("NF").setValue(1);
-				break;
-		}
-		// destination queue
-		// enqueue dest register
+		if (executing == null) return ;
+		System.out.println("EXECUTE");
+		executing.getOperation().operate(executing.getInstType(), EXECUTE);
+		execUse  = registers.get(executing.getFirstOp());
+		memAccessing = executing;
+		executing = null;
 	}
 
 	private void memoryAccess() {
-		registers.get("MBR").setValue(result);
+		if (memAccessing == null) return ;
+		System.out.println("MEMORY ACCESS");
+		memAccessing.getOperation().operate(memAccessing.getInstType(), MEMACESS);
+		memUse  = registers.get(memAccessing.getFirstOp());
+		writing = memAccessing;
+		memAccessing = null;
 	}
 
 	private void writeBack() {
-		// check if destination queue is empty
-		if (dest != null) {
-			// dequeue destination
-
-			// assign to dequeued register the value in MBR
-			registers.get(dest).setValue(registers.get("MBR").getValue());
-			executing = null;
-			done++;
-		}
+		if (writing == null) return ;
+		System.out.println("WRITE BACK");
+		writing.getOperation().operate(writing.getInstType(), WRITEBK);
+		wrtUse  = registers.get(writing.getFirstOp());
+		// System.out.println(writing.getFirstOp());
+		writing = null;
+		done++;
 	}
 
 	public static void main(String[] args) {
 		AMRS amrs = new AMRS(args[0]);
-		int ccc = amrs.start();
+		Results result = amrs.start();
 		
-		System.out.println("Total clock cycles consumed: " + ccc);
-		System.out.println("Total number of stalls: ");
+		System.out.println("-----------------------------------------------\nAMRS done...");
+		System.out.println("Total clock cycles consumed: " + result.getClockCyclesConsumed());
+		System.out.println("Total number of stalls: " + result.getStalls());
+		System.out.println("Hazards Encountered:");
 	}
 }
