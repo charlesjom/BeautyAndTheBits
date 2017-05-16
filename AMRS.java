@@ -28,7 +28,7 @@ public class AMRS {
 	private ArrayList<Instruction> instructions;
 
 	
-	private Register execUse, memUse, wrtUse;
+	private Register execUseDest, execUseSrc, memUseDest, memUseSrc, wrtUseDest, wrtUseSrc;
 	private boolean inExec, inMemAcs, inWrtBk;
 
 	private String dest, src;
@@ -39,11 +39,6 @@ public class AMRS {
 	private Instruction writing = null;
 	private int result, op1, op2;
 	private Results results;
-
-	private String dest, src;
-
-	private Instruction executing = null;
-	private int result, op1, op2;
 
 	public AMRS(String filepath) {
 		instructions = new ArrayList<Instruction>();
@@ -156,19 +151,36 @@ public class AMRS {
 	private void decode() {
 		if (registers.get("MAR").getValue() == 0 || registers.get("MAR").getValue() > instructions.size()) return ;
 		decoding = instructions.get(registers.get("MAR").getValue() - 1);	// get instruction
+		Instruction instBefore = null;
+		// Hazard encountered = null;
 
-		Register first = registers.get(decoding.getFirstOp());
-		Register second = registers.get(decoding.getSecondOp());
-		System.out.println(decoding.getFirstOp() + " " + decoding.getSecondOp());
+		if (registers.get("MAR").getValue() - 2 > 0) instBefore = instructions.get(registers.get("MAR").getValue() - 2);	// get instruction
 
-		if ((first == execUse && first != null && inExec) ||
-			(first == memUse && first != null && inMemAcs) ||
-			(first == wrtUse && first != null && inWrtBk) ||
-			(second == execUse && second != null && inExec) ||
-			(second == memUse && second != null && inMemAcs) ||
-			(second == wrtUse && second != null && inWrtBk)) {
-			stalled = true;
-			System.out.println("STALL");
+		if (instBefore != null) {		// no stall because first instruction
+			Register first = registers.get(decoding.getFirstOp());
+			Register second = registers.get(decoding.getSecondOp());
+
+			if ((first == execUseDest && first != null && inExec) || (first == memUseDest && first != null && inMemAcs) || (first == wrtUseDest && first != null && inWrtBk)) {
+				stalled = true;
+				// encountered = new Hazard(instBefore.getStatement(), decoding.getStatement(), 1);	// WAW
+				System.out.println("STALL");
+			}
+			else if ((second == execUseDest && second != null && inExec) || (second == memUseDest && second != null && inMemAcs) || (second == wrtUseDest && second != null && inWrtBk)) {
+				stalled = true;
+				// encountered = new Hazard(instBefore.getStatement(), decoding.getStatement(), 2);	// RAW
+				System.out.println("STALL");
+			}
+			else if ((first == execUseSrc && first != null && inExec) || (first == memUseSrc && first != null && inMemAcs) || (first == wrtUseSrc && first != null && inWrtBk)) {
+				stalled = true;
+				// encountered = new Hazard(instBefore.getStatement, decoding.getStatement(), 3);		// WAR
+				System.out.println("STALL");
+			}
+			else {
+				System.out.println("DECODE");
+				decoding.initOperation(decoding.getFirstOp(), decoding.getSecondOp());
+				executing = decoding;
+				decoding = null;
+			}
 		}
 		else {
 			System.out.println("DECODE");
@@ -183,7 +195,8 @@ public class AMRS {
 		if (executing == null) return ;
 		System.out.println("EXECUTE");
 		executing.getOperation().operate(executing.getInstType(), EXECUTE);
-		execUse  = registers.get(executing.getFirstOp());
+		execUseDest  = registers.get(executing.getFirstOp());
+		execUseSrc  = registers.get(executing.getSecondOp());
 		memAccessing = executing;
 		executing = null;
 	}
@@ -192,7 +205,8 @@ public class AMRS {
 		if (memAccessing == null) return ;
 		System.out.println("MEMORY ACCESS");
 		memAccessing.getOperation().operate(memAccessing.getInstType(), MEMACESS);
-		memUse  = registers.get(memAccessing.getFirstOp());
+		memUseDest  = registers.get(memAccessing.getFirstOp());
+		memUseSrc  = registers.get(memAccessing.getSecondOp());
 		writing = memAccessing;
 		memAccessing = null;
 	}
@@ -201,8 +215,8 @@ public class AMRS {
 		if (writing == null) return ;
 		System.out.println("WRITE BACK");
 		writing.getOperation().operate(writing.getInstType(), WRITEBK);
-		wrtUse  = registers.get(writing.getFirstOp());
-		// System.out.println(writing.getFirstOp());
+		wrtUseDest  = registers.get(writing.getFirstOp());
+		wrtUseSrc = registers.get(writing.getSecondOp());
 		writing = null;
 		done++;
 	}

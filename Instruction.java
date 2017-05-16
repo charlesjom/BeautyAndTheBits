@@ -2,6 +2,7 @@ import java.util.Arrays;
 import java.lang.NumberFormatException;
 
 public class Instruction {
+	private String instructionStatement;
 	private String instructionType;
 	private String parameter1;
 	private String parameter2;
@@ -20,6 +21,7 @@ public class Instruction {
 		this.valid = true;
 		this.done = false;
 		this.lineCount = lineCount;
+		this.instructionStatement = statement;
 		errorMsgStatus = new boolean[errorMessages.length];
 		initialize(statement);
 	}
@@ -99,8 +101,6 @@ public class Instruction {
 	public String getSecondOp() {
 		return this.parameter2;
 	}
-<<<<<<< HEAD
-=======
 
 	public void initOperation(String op1, String op2) {
 		operation = new Operation(op1, op2);
@@ -109,5 +109,8 @@ public class Instruction {
 	public Operation getOperation() {
 		return this.operation;
 	}
->>>>>>> milestone2
+
+	public String getStatement() {
+		return this.instructionStatement;
+	}
 }
