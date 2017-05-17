@@ -165,24 +165,18 @@ public class AMRS {
 				// encountered = new Hazard(instBefore.getStatement(), decoding.getStatement(), 1);	// WAW
 				// System.out.println("STALL");
 			}
-			else if ((second == execUseDest && second != null && inExec) || (second == memUseDest && second != null && inMemAcs) || (second == wrtUseDest && second != null && inWrtBk)) {
+			if ((second == execUseDest && second != null && inExec) || (second == memUseDest && second != null && inMemAcs) || (second == wrtUseDest && second != null && inWrtBk)) {
 				stalled = true;
 				// encountered = new Hazard(instBefore.getStatement(), decoding.getStatement(), 2);	// RAW
 				// System.out.println("STALL");
 			}
-			else if ((first == execUseSrc && first != null && inExec) || (first == memUseSrc && first != null && inMemAcs) || (first == wrtUseSrc && first != null && inWrtBk)) {
+			if ((first == execUseSrc && first != null && inExec) || (first == memUseSrc && first != null && inMemAcs) || (first == wrtUseSrc && first != null && inWrtBk)) {
 				stalled = true;
 				// encountered = new Hazard(instBefore.getStatement, decoding.getStatement(), 3);		// WAR
 				// System.out.println("STALL");
 			}
-			else {
-				// System.out.println("DECODE");
-				decoding.initOperation(decoding.getFirstOp(), decoding.getSecondOp());
-				executing = decoding;
-				decoding = null;
-			}
 		}
-		else {
+		if (stalled != true) {
 			// System.out.println("DECODE");
 			decoding.initOperation(decoding.getFirstOp(), decoding.getSecondOp());
 			executing = decoding;
