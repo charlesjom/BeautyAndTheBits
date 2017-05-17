@@ -6,6 +6,7 @@ public class Instruction {
 	private String instructionType;
 	private String parameter1;
 	private String parameter2;
+	private Operation operation;
 	
 	private int lineCount;
 	private boolean valid;
@@ -20,7 +21,7 @@ public class Instruction {
 		this.valid = true;
 		this.done = false;
 		this.lineCount = lineCount;
-		this.instructionStatement = statement;
+		this.instructionStatement = new String(statement);
 		errorMsgStatus = new boolean[errorMessages.length];
 		initialize(statement);
 	}

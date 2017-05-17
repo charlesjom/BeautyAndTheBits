@@ -1,26 +1,35 @@
 public class Hazard{
-	public static final int RAW = "1";
-	public static final int WAR = "2";
-	public static final int WAW = "3"; 
+	public static final int RAW = 1;
+	public static final int WAR = 2;
+	public static final int WAW = 3; 
 	
 	private String instruction1, instruction2;
 	private int hazard; 
 	
-	public Hazard(String instruction1, String instrucion2, int hazard){
-		this.instruction1 = instruction1;
-		this.instruction2 = instruction2;
+	public Hazard(String instruction1, String instruction2, int hazard){
+		this.instruction1 = new String(instruction1);
+		this.instruction2 = new String(instruction2);
 		this.hazard = hazard; 
 	}
 
-
 	public String getInstructions(){
-		return (instruction1 + "|" + instruction2);
+		return (instruction1 + " | " + instruction2);
 	}
 
 	public String getHazard(){
-		switch(this.hazard){
-		case RAW: return "RAW";
-		case WAR: return "WAR";
-		case WAW: return "WAW";
+		String hazard = "";
+
+		switch(this.hazard) {
+			case RAW:
+				hazard = "RAW";
+				break;
+			case WAR:
+				hazard = "WAR";
+				break;
+			case WAW:
+				hazard = "WAW";
+				break;
+		}
+		return hazard;
 	}
 }

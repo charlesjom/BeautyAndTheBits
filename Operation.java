@@ -83,7 +83,7 @@ public class Operation{
 				result = temp1 - temp2;
 				//if set zero flag(ZF) to 1 if the answer == 0,
 				//else if the answer is < 0, set negative flag(NF) to 1
-				//else if answer > 0 is set to negative flag(NF) and zero flag(ZF) to 0
+				//else if answer > 0 is set negative flag(NF) and zero flag(ZF) to 0
 				if(result == 0)	zFlag.setValue(1);
 				else if(result<0) nFlag.setValue(1);
 				else {
@@ -97,7 +97,6 @@ public class Operation{
 				break;
 
 			case 3:
-				AMRS.registers.get(op1).setValue(result);
 				break;
 		}
 	}

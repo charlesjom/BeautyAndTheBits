@@ -1,5 +1,1 @@
-LOAD R2, 3
-LOAD R1, 5
-LOAD R3, 2
-ADD R3, R2
-CMP R1, R2
+Hello sir :)
