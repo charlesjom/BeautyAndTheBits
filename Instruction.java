@@ -6,7 +6,6 @@ public class Instruction {
 	private String instructionType;
 	private String parameter1;
 	private String parameter2;
-	private Operation operation;
 	
 	private int lineCount;
 	private boolean valid;

@@ -3,7 +3,7 @@ public class Register {
 
 	public Register() {
 	}
-
+//successful assignment
 	public boolean setValue(int newValue) {
 		this.value = newValue;
 
@@ -15,3 +15,4 @@ public class Register {
 		return this.value;
 	}
 }
+//register class that sets and gets the value of each register

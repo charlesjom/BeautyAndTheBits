@@ -2,7 +2,6 @@ import java.io.FileReader;
 import java.io.BufferedReader;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.io.IOException;
 
 public class AMRS {
@@ -10,11 +9,6 @@ public class AMRS {
 	public static final String[] instruction_types = new String[]{"LOAD", "ADD", "SUB", "CMP"};
 	public static final String[] otherRegisters = new String[]{"PC", "MAR", "MBR", "OF", "NF", "ZF"};
 	public static final int NO_OF_REGISTERS = 38;
-	public static final int EXECUTE = 1;
-	public static final int MEMACESS = 2;
-	public static final int WRITEBK = 3;
-
-	public static HashMap<String, Register> registers;
 
 	private String line;
 	private int lineCounter = 1;
@@ -22,11 +16,8 @@ public class AMRS {
 	private boolean withError = false;
 	private int done = 0;
 	
-	private int clockCycles = 1;
-	private int stalls = 0;
-	private boolean stalled = false;
+	private int clockCycles = 0;
 	private ArrayList<Instruction> instructions;
-
 	
 	private Register execUseDest, execUseSrc, memUseDest, memUseSrc, wrtUseDest, wrtUseSrc;
 	private boolean inExec, inMemAcs, inWrtBk;
@@ -93,33 +84,16 @@ public class AMRS {
 	}
 
 	// start AMRS
-	public Results start() {
+	public int start() {
 		initRegisters();
 
-		registers.get("PC").setValue(1);
+		registers.get("PC").setValue(0);
 
 		while (true) {
-			boolean temp1, temp2, temp3;
-			System.out.println("----------------------------------");
-			System.out.println("Clock Cycle: " + clockCycles + "\n");
-			
-			// System.out.println(executing + " " + memAccessing + " " + writing);
-
 			writeBack();
 			memoryAccess();
-			temp3 = writing != null;
-
 			execute();
-			temp2 = memAccessing != null;
-		
-			// System.out.println(inExec);
-			// System.out.println(inMemAcs);
-			// System.out.println(inWrtBk);
-
-			decode();
-			// System.out.println(executing + " " + memAccessing + " " + writing);
-			temp1 = executing != null;
-
+			decode();									
 			fetch();
 
 			inExec = temp1;
@@ -128,20 +102,16 @@ public class AMRS {
 
 			printRegisters();
 			clockCycles++;
-			if (stalled == true) stalls++;
-			stalled = false;
 
 			if (done == instructions.size()) break;
-
-			results = new Results(stalls, clockCycles);
 		}
-		return results;
+		return clockCycles - 1;
 	}
 
 	// stages
 	private void fetch() {
-		if (stalled == true) return;
 		int address = registers.get("PC").getValue();		// get adrress of instruction
+
 		registers.get("MAR").setValue(address);				// put address to MAR
 		if (address > instructions.size()) return ;
 		// System.out.println("FETCH");
@@ -217,11 +187,9 @@ public class AMRS {
 
 	public static void main(String[] args) {
 		AMRS amrs = new AMRS(args[0]);
-		Results result = amrs.start();
+		int ccc = amrs.start();
 		
-		System.out.println("-----------------------------------------------\nAMRS done...");
-		System.out.println("Total clock cycles consumed: " + result.getClockCyclesConsumed());
-		System.out.println("Total number of stalls: " + result.getStalls());
-		System.out.println("Hazards Encountered:");
+		System.out.println("Total clock cycles consumed: " + ccc);
+		System.out.println("Total number of stalls: ");
 	}
 }
